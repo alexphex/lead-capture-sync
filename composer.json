@@ -1,10 +1,17 @@
 {
     "name": "alex/lead-capture-sync",
-    "description": "Lead Capture Sync Plugin",
+    "description": "WordPress Lead Capture Sync Plugin",
     "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
     "autoload": {
         "psr-4": {
             "LeadCaptureSync\\": "src/"
         }
-    }
+    },
+    "authors": [
+        {
+            "name": "alex"
+        }
+    ],
+    "require": {}
 }
