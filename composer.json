@@ -1,0 +1,10 @@
+{
+    "name": "alex/lead-capture-sync",
+    "description": "Lead Capture Sync Plugin",
+    "type": "wordpress-plugin",
+    "autoload": {
+        "psr-4": {
+            "LeadCaptureSync\\": "src/"
+        }
+    }
+}
