@@ -8,6 +8,7 @@ use LeadCaptureSync\Repository\LeadRepository;
 use LeadCaptureSync\Services\WebhookService;
 use LeadCaptureSync\Admin\SettingsPage;
 use LeadCaptureSync\Services\Logger;
+use LeadCaptureSync\Services\LeadService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,10 +42,16 @@ class Plugin {
             $logger
         );
 
-        $this->leadController = new LeadController(
+        $leadService = new LeadService(
             $repository,
-            $webhookService
+            $webhookService,
+            $logger
         );
+
+        $this->leadController = new LeadController(
+            $leadService
+        );
+
     }
 
     public function init(): void {

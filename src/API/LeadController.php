@@ -3,8 +3,7 @@
 namespace LeadCaptureSync\API;
 
 use LeadCaptureSync\Models\Lead;
-use LeadCaptureSync\Repository\LeadRepository;
-use LeadCaptureSync\Services\WebhookService;
+use LeadCaptureSync\Services\LeadService;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -13,8 +12,7 @@ defined( 'ABSPATH' ) || exit;
 class LeadController {
 
     public function __construct(
-        private LeadRepository $repository,
-        private WebhookService $webhookService
+        private LeadService $leadService
     ) {
     }
 
@@ -33,7 +31,7 @@ class LeadController {
 
     public function store( WP_REST_Request $request ): WP_REST_Response {
 
-        $name  = sanitize_text_field(
+        $name = sanitize_text_field(
             $request->get_param( 'name' )
         );
 
@@ -45,7 +43,6 @@ class LeadController {
             $request->get_param( 'phone' )
         );
 
-
         if ( empty( $name ) || empty( $email ) ) {
 
             return new WP_REST_Response(
@@ -56,7 +53,6 @@ class LeadController {
                 400
             );
         }
-
 
         if ( ! is_email( $email ) ) {
 
@@ -75,9 +71,10 @@ class LeadController {
             $phone
         );
 
-        $id = $this->repository->create( $lead );
-
-        $this->webhookService->send( $lead );
+        // Create the lead and get the ID
+        $id = $this->leadService->createLead(
+            $lead
+        );
 
         return new WP_REST_Response(
             [
