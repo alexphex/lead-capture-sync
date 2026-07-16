@@ -9,6 +9,10 @@ use LeadCaptureSync\Services\WebhookService;
 use LeadCaptureSync\Admin\SettingsPage;
 use LeadCaptureSync\Services\Logger;
 use LeadCaptureSync\Services\LeadService;
+use LeadCaptureSync\Security\RequestValidator;
+use LeadCaptureSync\Integrations\ContactForm7Handler;
+use LeadCaptureSync\Integrations\ContactForm7Provider;
+use LeadCaptureSync\API\CallbackController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,6 +21,8 @@ class Plugin {
     private LeadPostType $leadPostType;
     private LeadController $leadController;
     private SettingsPage $settingsPage;
+    private ContactForm7Handler $contactForm7Handler;
+    private CallbackController $callbackController;
 
     public function __construct() {
 
@@ -48,8 +54,24 @@ class Plugin {
             $logger
         );
 
+        $requestValidator = new RequestValidator();
+
+        $this->callbackController = new CallbackController(
+            $repository,
+            $requestValidator
+        );
+
+
+        $contactForm7Provider = new ContactForm7Provider();
+
+        $this->contactForm7Handler = new ContactForm7Handler(
+            $leadService,
+            $contactForm7Provider
+        );
+
         $this->leadController = new LeadController(
-            $leadService
+            $leadService,
+            $requestValidator
         );
 
     }
@@ -58,7 +80,7 @@ class Plugin {
 
         add_action(
             'init',
-            [ $this->leadPostType, 'register' ]
+            [ $this->leadPostType, 'register']
         );
 
         add_action(
@@ -66,9 +88,18 @@ class Plugin {
             [ $this->leadController, 'registerRoutes' ]
         );
 
+
+        add_action(
+            'rest_api_init',
+            [ $this->callbackController, 'registerRoutes' ]
+        );
+
+
         add_action(
             'admin_menu',
             [ $this->settingsPage, 'register' ]
         );
+
+        $this->contactForm7Handler->register();
     }
 }

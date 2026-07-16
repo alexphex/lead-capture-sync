@@ -4,6 +4,7 @@ namespace LeadCaptureSync\API;
 
 use LeadCaptureSync\Models\Lead;
 use LeadCaptureSync\Services\LeadService;
+use LeadCaptureSync\Security\RequestValidator;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -12,7 +13,8 @@ defined( 'ABSPATH' ) || exit;
 class LeadController {
 
     public function __construct(
-        private LeadService $leadService
+        private LeadService $leadService,
+        private RequestValidator $requestValidator
     ) {
     }
 
@@ -24,7 +26,10 @@ class LeadController {
             [
                 'methods'             => 'POST',
                 'callback'            => [ $this, 'store' ],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [
+                                            $this,
+                                            'authorize',
+                                        ],
             ]
         );
     }
@@ -82,6 +87,16 @@ class LeadController {
                 'id'      => $id,
             ],
             201
+        );
+    }
+
+    //authorize the request using the RequestValidator service
+    public function authorize(
+            WP_REST_Request $request
+        ): bool {
+
+        return $this->requestValidator->validate(
+            $request
         );
     }
 }
